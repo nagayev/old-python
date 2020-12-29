@@ -1,5 +1,5 @@
 /***********************************************************
-Copyright 1991, 1992, 1993 by Stichting Mathematisch Centrum,
+Copyright 1991, 1992, 1993, 1994 by Stichting Mathematisch Centrum,
 Amsterdam, The Netherlands.
 
                         All Rights Reserved
@@ -336,7 +336,7 @@ file_read(f, args)
 */
 
 static object *
-getline(f, n)
+Py_getline(f, n)
 	fileobject *f;
 	int n;
 {
@@ -458,7 +458,7 @@ filegetline(f, n)
 	}
 	if (((fileobject*)f)->f_fp == NULL)
 		return err_closed();
-	return getline((fileobject *)f, n);
+	return Py_getline((fileobject *)f, n);
 }
 
 /* Python method */
@@ -483,7 +483,7 @@ file_readline(f, args)
 		}
 	}
 
-	return getline(f, n);
+	return Py_getline(f, n);
 }
 
 static object *
@@ -501,7 +501,7 @@ file_readlines(f, args)
 	if ((list = newlistobject(0)) == NULL)
 		return NULL;
 	for (;;) {
-		line = getline(f, 0);
+		line = Py_getline(f, 0);
 		if (line != NULL && getstringsize(line) == 0) {
 			DECREF(line);
 			break;
@@ -583,17 +583,17 @@ file_writelines(f, args)
 }
 
 static struct methodlist file_methods[] = {
-	{"close",	file_close},
-	{"flush",	file_flush},
-	{"fileno",	file_fileno},
-	{"isatty",	file_isatty},
-	{"read",	file_read},
-	{"readline",	file_readline},
-	{"readlines",	file_readlines},
-	{"seek",	file_seek},
-	{"tell",	file_tell},
-	{"write",	file_write},
-	{"writelines",	file_writelines},
+	{"close",	(method)file_close},
+	{"flush",	(method)file_flush},
+	{"fileno",	(method)file_fileno},
+	{"isatty",	(method)file_isatty},
+	{"read",	(method)file_read},
+	{"readline",	(method)file_readline},
+	{"readlines",	(method)file_readlines},
+	{"seek",	(method)file_seek},
+	{"tell",	(method)file_tell},
+	{"write",	(method)file_write},
+	{"writelines",	(method)file_writelines},
 	{NULL,		NULL}		/* sentinel */
 };
 
@@ -611,12 +611,12 @@ typeobject Filetype = {
 	"file",
 	sizeof(fileobject),
 	0,
-	file_dealloc,	/*tp_dealloc*/
+	(destructor)file_dealloc, /*tp_dealloc*/
 	0,		/*tp_print*/
-	file_getattr,	/*tp_getattr*/
+	(getattrfunc)file_getattr, /*tp_getattr*/
 	0,		/*tp_setattr*/
 	0,		/*tp_compare*/
-	file_repr,	/*tp_repr*/
+	(reprfunc)file_repr, /*tp_repr*/
 };
 
 /* Interface for the 'soft space' between print items. */
